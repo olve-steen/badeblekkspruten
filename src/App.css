@@ -144,6 +144,8 @@ h2 {
 
 input {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   box-sizing: border-box;
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -152,6 +154,12 @@ input {
   font-size: 16px;
   background: white;
   transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+input[type="date"] {
+  display: block;
+  inline-size: 100%;
+  min-inline-size: 0;
 }
 
 input:focus-visible {
