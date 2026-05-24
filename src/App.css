@@ -126,6 +126,7 @@ h1 {
 }
 
 .register-form {
+  min-width: 0;
   margin-bottom: 14px;
 }
 
@@ -159,7 +160,10 @@ input {
 input[type="date"] {
   display: block;
   inline-size: 100%;
+  max-inline-size: 100%;
   min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 input:focus-visible {
@@ -234,8 +238,32 @@ h3 {
   background: color-mix(in srgb, var(--shell) 55%, white);
   border: 1px solid color-mix(in srgb, var(--line) 72%, white);
   border-radius: 12px;
+  min-width: 0;
   padding: 10px;
   margin-bottom: 8px;
+}
+
+@supports (-webkit-touch-callout: none) {
+  input[type="date"] {
+    width: 100%;
+    min-width: 0;
+    padding-right: 34px;
+  }
+
+  input[type="date"]::-webkit-date-and-time-value {
+    min-width: 0;
+    text-align: left;
+  }
+
+  input[type="date"]::-webkit-datetime-edit {
+    min-width: 0;
+    padding: 0;
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    margin: 0;
+    padding: 0;
+  }
 }
 
 .bath-line {
