@@ -24,7 +24,7 @@ body {
 .app-shell {
   max-width: 760px;
   margin: 0 auto;
-  padding: 14px 12px calc(92px + env(safe-area-inset-bottom));
+  padding: 14px 12px calc(104px + env(safe-area-inset-bottom));
 }
 
 .hero {
@@ -82,10 +82,10 @@ h1 {
 
 .bottom-nav-button {
   width: 100%;
-  min-height: 52px;
+  min-height: 62px;
   border: 0;
   border-radius: 0;
-  padding: 8px 6px 10px;
+  padding: 10px 6px 12px;
   font-size: 0.82rem;
   font-weight: 600;
   letter-spacing: 0;
@@ -370,12 +370,12 @@ h3 {
   }
 
   .bottom-nav {
-    left: 50%;
-    right: auto;
-    transform: translateX(-50%);
-    width: min(760px, 100%);
-    border-left: 1px solid color-mix(in srgb, var(--line) 85%, white);
-    border-right: 1px solid color-mix(in srgb, var(--line) 85%, white);
+    left: 0;
+    right: 0;
+    transform: none;
+    width: 100%;
+    border-left: 0;
+    border-right: 0;
   }
 
   .bottom-nav-button {
