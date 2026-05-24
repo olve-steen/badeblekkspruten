@@ -24,8 +24,42 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+function toLocalDateString(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
 function todayDateValue() {
-  return new Date().toISOString().slice(0, 10);
+  return toLocalDateString(new Date());
+}
+
+function normalizeWhitespace(value) {
+  return value.trim().replace(/\s+/g, " ");
+}
+
+function toDisplayCase(value) {
+  const normalized = normalizeWhitespace(value);
+
+  if (!normalized) {
+    return "";
+  }
+
+  return normalized
+    .split(" ")
+    .map((part) => {
+      const firstChar = part.charAt(0).toLocaleUpperCase("nb-NO");
+      const rest = part.slice(1).toLocaleLowerCase("nb-NO");
+
+      return `${firstChar}${rest}`;
+    })
+    .join(" ");
+}
+
+function toCompareKey(value) {
+  return normalizeWhitespace(value).toLocaleLowerCase("nb-NO");
 }
 
 function formatDateValue(rawDate) {
@@ -38,11 +72,11 @@ function formatDateValue(rawDate) {
   }
 
   if (rawDate instanceof Date) {
-    return rawDate.toISOString().slice(0, 10);
+    return toLocalDateString(rawDate);
   }
 
   if (typeof rawDate.toDate === "function") {
-    return rawDate.toDate().toISOString().slice(0, 10);
+    return toLocalDateString(rawDate.toDate());
   }
 
   return todayDateValue();
@@ -60,8 +94,10 @@ function App() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [noticeMessage, setNoticeMessage] = useState("");
+  const [pendingDeleteBath, setPendingDeleteBath] = useState(null);
 
   async function loadBaths() {
     setIsLoadingData(true);
@@ -92,10 +128,12 @@ function App() {
   async function registerBath(event) {
     event.preventDefault();
 
-    const trimmedUser = user.trim();
-    const trimmedLocation = location.trim();
+    const userKey = toCompareKey(user);
+    const locationKey = toCompareKey(location);
+    const displayUser = toDisplayCase(user);
+    const displayLocation = toDisplayCase(location);
 
-    if (!trimmedUser || !trimmedLocation || !bathDate || isSubmitting) {
+    if (!userKey || !locationKey || !bathDate || isSubmitting) {
       return;
     }
 
@@ -105,18 +143,18 @@ function App() {
 
     try {
       const hasExistingLocation = baths.some(
-        (bath) => bath.user === trimmedUser && bath.location === trimmedLocation
+        (bath) => toCompareKey(bath.user) === userKey && toCompareKey(bath.location) === locationKey
       );
       const points = hasExistingLocation ? 1 : 2;
 
       await addDoc(collection(db, "baths"), {
-        user: trimmedUser,
-        location: trimmedLocation,
+        user: displayUser,
+        location: displayLocation,
         points,
-        date: new Date(bathDate),
+        date: bathDate,
       });
 
-      setUser(trimmedUser);
+      setUser(displayUser);
       setLocation("");
       setBathDate(todayDateValue());
       setNoticeMessage(`Bad registrert! +${points} poeng`);
@@ -144,9 +182,10 @@ function App() {
   }
 
   async function saveEdit(bath) {
-    const trimmedLocation = editLocation.trim();
+    const locationKey = toCompareKey(editLocation);
+    const displayLocation = toDisplayCase(editLocation);
 
-    if (!trimmedLocation || !editDate || isSavingEdit) {
+    if (!locationKey || !editDate || isSavingEdit) {
       return;
     }
 
@@ -155,17 +194,18 @@ function App() {
     setNoticeMessage("");
 
     try {
+      const userKey = toCompareKey(bath.user);
       const hasExistingLocation = baths.some(
         (item) =>
           item.id !== bath.id &&
-          item.user === bath.user &&
-          item.location === trimmedLocation
+          toCompareKey(item.user) === userKey &&
+          toCompareKey(item.location) === locationKey
       );
       const points = hasExistingLocation ? 1 : 2;
 
       await updateDoc(doc(db, "baths", bath.id), {
-        location: trimmedLocation,
-        date: new Date(editDate),
+        location: displayLocation,
+        date: editDate,
         points,
       });
 
@@ -179,9 +219,22 @@ function App() {
     }
   }
 
+  function requestDeleteBath(bath) {
+    setPendingDeleteBath(bath);
+    setErrorMessage("");
+    setNoticeMessage("");
+  }
+
+  function cancelDeleteBath() {
+    if (!isDeleting) {
+      setPendingDeleteBath(null);
+    }
+  }
+
   async function removeBath(bathId) {
     setErrorMessage("");
     setNoticeMessage("");
+    setIsDeleting(true);
 
     try {
       await deleteDoc(doc(db, "baths", bathId));
@@ -192,8 +245,24 @@ function App() {
 
       setNoticeMessage("Bad slettet.");
       await loadBaths();
+      return true;
     } catch {
       setErrorMessage("Kunne ikke slette badet nå. Prøv igjen.");
+      return false;
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+
+  async function confirmDeleteBath() {
+    if (!pendingDeleteBath || isDeleting) {
+      return;
+    }
+
+    const deleted = await removeBath(pendingDeleteBath.id);
+
+    if (deleted) {
+      setPendingDeleteBath(null);
     }
   }
 
@@ -225,18 +294,18 @@ function App() {
   }, [baths]);
 
   const visibleUserBaths = useMemo(() => {
-    const trimmedUser = user.trim();
+    const userKey = toCompareKey(user);
 
-    if (!trimmedUser) {
+    if (!userKey) {
       return [];
     }
 
     return baths
-      .filter((bath) => bath.user === trimmedUser)
+      .filter((bath) => toCompareKey(bath.user) === userKey)
       .sort((a, b) => b.dateValue.localeCompare(a.dateValue));
   }, [baths, user]);
 
-  const canSubmit = user.trim() && location.trim() && bathDate && !isSubmitting;
+  const canSubmit = toCompareKey(user) && toCompareKey(location) && bathDate && !isSubmitting;
 
   return (
     <div className="app-shell">
@@ -351,7 +420,7 @@ function App() {
                             <button
                               type="button"
                               className="small-button danger"
-                              onClick={() => removeBath(bath.id)}
+                              onClick={() => requestDeleteBath(bath)}
                             >
                               🗑️ Slett
                             </button>
@@ -408,12 +477,50 @@ function App() {
         </button>
       </nav>
 
-      <footer className="footer-note">
-        <span className="footer-icon">ℹ️</span>
-        Godkjent bad: Hodet under vann / 5 svømmetak.
-        <br />
-        Første gang på nytt sted gir 2 poeng. Ellers 1 poeng.
-      </footer>
+      {activeTab === "registrer" && (
+        <footer className="footer-note">
+          <span className="footer-icon">ℹ️</span>
+          Godkjent bad: Hodet under vann / 5 svømmetak.
+          <br />
+          Første gang på nytt sted gir 2 poeng, ellers 1 poeng.
+        </footer>
+      )}
+
+      {pendingDeleteBath && (
+        <div className="dialog-backdrop" role="presentation" onClick={cancelDeleteBath}>
+          <section
+            className="dialog-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-dialog-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h3 id="delete-dialog-title">Slette bad?</h3>
+            <p>
+              Er du sikker på at du vil slette badet ved <strong>{pendingDeleteBath.location}</strong>?
+            </p>
+
+            <div className="dialog-actions">
+              <button
+                type="button"
+                className="dialog-button secondary"
+                onClick={cancelDeleteBath}
+                disabled={isDeleting}
+              >
+                Avbryt
+              </button>
+              <button
+                type="button"
+                className="dialog-button danger"
+                onClick={confirmDeleteBath}
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Sletter..." : "Ja, slett"}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   );
 }

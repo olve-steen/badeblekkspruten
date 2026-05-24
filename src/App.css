@@ -292,6 +292,56 @@ h3 {
   margin-bottom: 4px;
 }
 
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(6, 30, 36, 0.42);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.dialog-card {
+  width: min(420px, 100%);
+  background: #ffffff;
+  border: 1px solid color-mix(in srgb, var(--line) 80%, white);
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 16px 34px rgba(6, 30, 36, 0.22);
+}
+
+.dialog-card h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.dialog-card p {
+  margin: 0;
+  color: color-mix(in srgb, var(--muted) 85%, black);
+}
+
+.dialog-actions {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.dialog-button {
+  min-height: 40px;
+  border-radius: 10px;
+}
+
+.dialog-button.secondary {
+  background: #eff8fa;
+  color: color-mix(in srgb, var(--ink) 90%, var(--sea-2));
+}
+
+.dialog-button.danger {
+  background: #d65343;
+}
+
 @keyframes fade-up {
   from {
     opacity: 0;
