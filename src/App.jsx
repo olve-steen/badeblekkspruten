@@ -82,6 +82,15 @@ function formatDateValue(rawDate) {
   return todayDateValue();
 }
 
+function formatDisplayDate(dateValue) {
+  if (!dateValue || !dateValue.includes("-")) {
+    return "Velg dato";
+  }
+
+  const [year, month, day] = dateValue.split("-");
+  return `${day}.${month}.${year}`;
+}
+
 function App() {
   const [activeTab, setActiveTab] = useState("registrer");
   const [user, setUser] = useState("");
@@ -343,13 +352,20 @@ function App() {
                 <label className="field-label" htmlFor="date-input">
                   Dato
                 </label>
-                <input
-                  id="date-input"
-                  type="date"
-                  value={bathDate}
-                  max={todayDateValue()}
-                  onChange={(e) => setBathDate(e.target.value)}
-                />
+                <div className="date-field">
+                  <span className="date-field-value">{formatDisplayDate(bathDate)}</span>
+                  <span className="date-field-icon" aria-hidden="true">
+                    📅
+                  </span>
+                  <input
+                    id="date-input"
+                    className="date-input-native"
+                    type="date"
+                    value={bathDate}
+                    max={todayDateValue()}
+                    onChange={(e) => setBathDate(e.target.value)}
+                  />
+                </div>
 
                 <button type="submit" disabled={!canSubmit}>
                   {isSubmitting ? "Registrerer..." : "🌊 Registrer bad"}
@@ -383,13 +399,20 @@ function App() {
                           <label className="field-label" htmlFor={`date-${bath.id}`}>
                             Dato
                           </label>
-                          <input
-                            id={`date-${bath.id}`}
-                            type="date"
-                            value={editDate}
-                            max={todayDateValue()}
-                            onChange={(e) => setEditDate(e.target.value)}
-                          />
+                          <div className="date-field">
+                            <span className="date-field-value">{formatDisplayDate(editDate)}</span>
+                            <span className="date-field-icon" aria-hidden="true">
+                              📅
+                            </span>
+                            <input
+                              id={`date-${bath.id}`}
+                              className="date-input-native"
+                              type="date"
+                              value={editDate}
+                              max={todayDateValue()}
+                              onChange={(e) => setEditDate(e.target.value)}
+                            />
+                          </div>
 
                           <div className="item-actions">
                             <button
