@@ -8,7 +8,6 @@
   --sea-2: #2eaeb4;
   --primary: #127b9f;
   --shell: #edf7f8;
-  --accent: #127b9f;
   --line: #bfdce2;
   --muted: #54646c;
 }
@@ -53,10 +52,6 @@ h1 {
   padding: 14px;
   box-shadow: 0 6px 20px rgba(0, 24, 40, 0.08);
   animation: fade-up 620ms ease-out both;
-}
-
-.card:nth-of-type(2) {
-  animation-delay: 80ms;
 }
 
 .card-main {
@@ -263,7 +258,7 @@ button:disabled {
 .notice.error {
   color: #7d210f;
   background: color-mix(in srgb, #ffd5c6 70%, white);
-  border: 1px solid color-mix(in srgb, var(--accent) 35%, white);
+  border: 1px solid color-mix(in srgb, var(--primary) 35%, white);
 }
 
 .muted {

@@ -107,6 +107,8 @@ function App() {
   const [errorMessage, setErrorMessage] = useState("");
   const [noticeMessage, setNoticeMessage] = useState("");
   const [pendingDeleteBath, setPendingDeleteBath] = useState(null);
+  const userSearchKey = toCompareKey(user);
+  const locationInputKey = toCompareKey(location);
 
   async function loadBaths() {
     setIsLoadingData(true);
@@ -303,18 +305,16 @@ function App() {
   }, [baths]);
 
   const visibleUserBaths = useMemo(() => {
-    const userKey = toCompareKey(user);
-
-    if (!userKey) {
+    if (!userSearchKey) {
       return [];
     }
 
     return baths
-      .filter((bath) => toCompareKey(bath.user) === userKey)
+      .filter((bath) => toCompareKey(bath.user) === userSearchKey)
       .sort((a, b) => b.dateValue.localeCompare(a.dateValue));
-  }, [baths, user]);
+  }, [baths, userSearchKey]);
 
-  const canSubmit = toCompareKey(user) && toCompareKey(location) && bathDate && !isSubmitting;
+  const canSubmit = Boolean(userSearchKey && locationInputKey && bathDate && !isSubmitting);
 
   return (
     <div className="app-shell">
@@ -375,7 +375,7 @@ function App() {
               <div className="list-block">
                 <h3>Dine registrerte bad</h3>
 
-                {!user.trim() ? (
+                {!userSearchKey ? (
                   <p className="muted">Skriv inn navn over for å se badene dine.</p>
                 ) : isLoadingData ? (
                   <p className="muted">Laster bad...</p>
