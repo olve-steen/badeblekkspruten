@@ -476,7 +476,7 @@ function App() {
             </>
           )}
 
-          {noticeMessage && <p className="notice success">{noticeMessage}</p>}
+          {activeTab === "registrer" && noticeMessage && <p className="notice success">{noticeMessage}</p>}
           {errorMessage && <p className="notice error">{errorMessage}</p>}
         </section>
       </main>
