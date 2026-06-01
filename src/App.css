@@ -357,6 +357,7 @@ h3 {
   display: block;
   width: 100%;
   height: auto;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .stats-axis {
@@ -381,6 +382,15 @@ h3 {
   stroke-linejoin: round;
 }
 
+.stats-series-hit-area {
+  stroke: transparent;
+  stroke-width: 24;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
 .stats-legend {
   margin-top: 12px;
   display: flex;
@@ -403,6 +413,7 @@ h3 {
   color: color-mix(in srgb, var(--ink) 90%, black);
   box-shadow: none;
   transform: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .stats-legend-item:hover {

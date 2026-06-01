@@ -165,10 +165,18 @@ function CumulativeParticipantsChart({ dates, series }) {
   const firstDateLabel = formatShortDisplayDate(dates[0]);
   const middleDateLabel = formatShortDisplayDate(dates[Math.floor((dates.length - 1) / 2)]);
   const lastDateLabel = formatShortDisplayDate(dates[dates.length - 1]);
+  const toggleHighlightedParticipant = (name) => {
+    setHighlightedParticipant((current) => (current === name ? "" : name));
+  };
 
   return (
     <div className="stats-chart">
-      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Kumulativ utvikling for deltakere over tid">
+      <svg
+        viewBox={`0 0 ${width} ${height}`}
+        role="img"
+        aria-label="Kumulativ utvikling for deltakere over tid"
+        onClick={() => setHighlightedParticipant("")}
+      >
         {yTicks.map((tickValue, index) => {
           const y = getY(tickValue);
 
@@ -205,17 +213,28 @@ function CumulativeParticipantsChart({ dates, series }) {
           const isDimmed = highlightedParticipant && !isHighlighted;
 
           return (
-            <polyline
-              key={participant.name}
-              points={linePoints}
-              fill="none"
-              className="stats-series-line"
-              style={{
-                stroke: participant.color,
-                opacity: isDimmed ? 0.22 : 1,
-                strokeWidth: isHighlighted ? 6 : 4,
-              }}
-            />
+            <g key={participant.name}>
+              <polyline
+                points={linePoints}
+                fill="none"
+                className="stats-series-hit-area"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  toggleHighlightedParticipant(participant.name);
+                }}
+              />
+              <polyline
+                points={linePoints}
+                fill="none"
+                className="stats-series-line"
+                style={{
+                  stroke: participant.color,
+                  opacity: isDimmed ? 0.22 : 1,
+                  strokeWidth: isHighlighted ? 6 : 4,
+                  pointerEvents: "none",
+                }}
+              />
+            </g>
           );
         })}
 
@@ -255,9 +274,7 @@ function CumulativeParticipantsChart({ dates, series }) {
               key={participant.name}
               type="button"
               className={`stats-legend-item ${isSelected ? "active" : ""} ${isDimmed ? "dimmed" : ""}`}
-              onClick={() =>
-                setHighlightedParticipant((current) => (current === participant.name ? "" : participant.name))
-              }
+              onClick={() => toggleHighlightedParticipant(participant.name)}
               aria-pressed={isSelected}
             >
               <span className="stats-legend-dot" style={{ backgroundColor: participant.color }} aria-hidden="true" />
