@@ -475,12 +475,27 @@ function App() {
       totals[bath.user] += bath.points;
     });
 
-    return Object.entries(totals)
+    const sorted = Object.entries(totals)
       .map(([name, points]) => ({
         name,
         points,
       }))
       .sort((a, b) => b.points - a.points);
+
+    let previousPoints = null;
+    let currentRank = 0;
+
+    return sorted.map((entry, index) => {
+      if (entry.points !== previousPoints) {
+        currentRank = index + 1;
+        previousPoints = entry.points;
+      }
+
+      return {
+        ...entry,
+        rank: currentRank,
+      };
+    });
   }, [baths]);
 
   const visibleUserBaths = useMemo(() => {
@@ -689,14 +704,19 @@ function App() {
               ) : leaderboard.length === 0 ? (
                 <p className="muted">Ingen registrerte bad enda.</p>
               ) : (
-                leaderboard.map((person, index) => (
-                  <div key={person.name} className="leaderboard-item">
-                    <span>
-                      {index + 1}. {person.name}
-                    </span>
-                    <strong>{person.points} poeng</strong>
-                  </div>
-                ))
+                leaderboard.map((person) => {
+                  const topScore = leaderboard[0]?.points ?? 0;
+                  const isTopScore = person.points === topScore;
+
+                  return (
+                    <div key={person.name} className="leaderboard-item">
+                      <span>
+                        {person.rank}. {person.name} {isTopScore ? "👑" : ""}
+                      </span>
+                      <strong>{person.points} poeng</strong>
+                    </div>
+                  );
+                })
               )}
             </>
           ) : (
