@@ -18,12 +18,13 @@ body {
   font-family: var(--font-main);
   color: var(--ink);
   background: #dff7fb;
+  line-height: 1.4;
 }
 
 .app-shell {
   max-width: 760px;
   margin: 0 auto;
-  padding: 14px 12px calc(104px + env(safe-area-inset-bottom));
+  padding: 16px 14px calc(116px + env(safe-area-inset-bottom));
 }
 
 .hero {
@@ -67,7 +68,7 @@ h1 {
   bottom: 0;
   z-index: 30;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0;
   padding: 0 0 env(safe-area-inset-bottom);
   background: white;
@@ -77,11 +78,11 @@ h1 {
 
 .bottom-nav-button {
   width: 100%;
-  min-height: 62px;
+  min-height: 72px;
   border: 0;
   border-radius: 0;
-  padding: 10px 6px 12px;
-  font-size: 0.82rem;
+  padding: 10px 6px 14px;
+  font-size: 0.96rem;
   font-weight: 600;
   letter-spacing: 0;
   color: color-mix(in srgb, var(--muted) 78%, white);
@@ -93,7 +94,7 @@ h1 {
   display: grid;
   justify-items: center;
   align-content: center;
-  gap: 2px;
+  gap: 3px;
   opacity: 0.52;
 }
 
@@ -111,12 +112,12 @@ h1 {
 }
 
 .bottom-nav-icon {
-  font-size: 1.25rem;
+  font-size: 1.45rem;
   line-height: 1;
 }
 
 .bottom-nav-label {
-  font-size: 0.75rem;
+  font-size: 0.86rem;
   line-height: 1.05;
 }
 
@@ -127,14 +128,14 @@ h1 {
 
 h2 {
   margin: 0 0 12px;
-  font-size: 1.08rem;
+  font-size: 1.24rem;
   letter-spacing: -0.01em;
 }
 
 .field-label {
   display: block;
   margin-bottom: 6px;
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: color-mix(in srgb, var(--muted) 80%, black);
 }
 
@@ -145,9 +146,9 @@ input {
   box-sizing: border-box;
   border: 1px solid var(--line);
   border-radius: 12px;
-  padding: 12px;
+  padding: 14px;
   margin-bottom: 12px;
-  font-size: 16px;
+  font-size: 17px;
   background: white;
   transition: border-color 160ms ease, box-shadow 160ms ease;
 }
@@ -169,7 +170,7 @@ input[type="date"] {
   border: 1px solid var(--line);
   border-radius: 12px;
   background: white;
-  padding: 12px;
+  padding: 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -178,12 +179,12 @@ input[type="date"] {
 }
 
 .date-field-value {
-  font-size: 16px;
+  font-size: 17px;
   color: var(--ink);
 }
 
 .date-field-icon {
-  font-size: 1rem;
+  font-size: 1.1rem;
   line-height: 1;
 }
 
@@ -218,9 +219,9 @@ button {
   width: 100%;
   border: none;
   border-radius: 12px;
-  min-height: 44px;
+  min-height: 48px;
   padding: 12px 14px;
-  font-size: 0.96rem;
+  font-size: 1.04rem;
   font-weight: 700;
   letter-spacing: 0.01em;
   color: #fff;
@@ -246,7 +247,7 @@ button:disabled {
   margin: 12px 0 0;
   border-radius: 10px;
   padding: 10px;
-  font-size: 0.9rem;
+  font-size: 0.98rem;
 }
 
 .notice.success {
@@ -264,6 +265,7 @@ button:disabled {
 .muted {
   color: var(--muted);
   margin: 0;
+  font-size: 0.98rem;
 }
 
 .list-block {
@@ -273,7 +275,7 @@ button:disabled {
 
 h3 {
   margin: 0 0 10px;
-  font-size: 0.97rem;
+  font-size: 1.08rem;
 }
 
 .bath-item {
@@ -301,7 +303,7 @@ h3 {
 
 .bath-name {
   margin: 0;
-  font-size: 0.96rem;
+  font-size: 1.04rem;
 }
 
 .item-actions {
@@ -313,10 +315,10 @@ h3 {
 
 .small-button {
   width: 100%;
-  min-height: 40px;
+  min-height: 44px;
   padding: 8px 10px;
   border-radius: 10px;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
 }
 
 .small-button.ghost {
@@ -335,17 +337,107 @@ h3 {
   align-items: center;
   padding: 10px 0;
   border-bottom: 1px solid color-mix(in srgb, var(--line) 78%, white);
+  font-size: 1.02rem;
 }
 
 .leaderboard-item strong {
   color: color-mix(in srgb, var(--ink) 86%, var(--sea-2));
 }
 
+.stats-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.stats-chart {
+  padding: 2px 0 0;
+}
+
+.stats-chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.stats-axis {
+  stroke: color-mix(in srgb, var(--line) 84%, black);
+  stroke-width: 1.5;
+}
+
+.stats-axis-label {
+  fill: color-mix(in srgb, var(--muted) 88%, black);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.stats-grid-line {
+  stroke: color-mix(in srgb, var(--line) 68%, white);
+  stroke-width: 1;
+}
+
+.stats-series-line {
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.stats-legend {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+}
+
+.stats-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  width: auto;
+  min-height: 38px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--line) 82%, white);
+  background: color-mix(in srgb, var(--shell) 32%, white);
+  color: color-mix(in srgb, var(--ink) 90%, black);
+  box-shadow: none;
+  transform: none;
+}
+
+.stats-legend-item:hover {
+  background: color-mix(in srgb, var(--shell) 52%, white);
+  box-shadow: none;
+  transform: none;
+}
+
+.stats-legend-item:focus-visible {
+  outline: none;
+  border-color: var(--sea-2);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--sea-1) 35%, transparent);
+}
+
+.stats-legend-item.active {
+  border-color: color-mix(in srgb, var(--sea-2) 72%, black);
+  background: color-mix(in srgb, var(--sea-1) 35%, white);
+}
+
+.stats-legend-item.dimmed {
+  opacity: 0.5;
+}
+
+.stats-legend-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #000 18%, transparent);
+}
+
 .footer-note {
   margin: 12px 2px 0;
   text-align: center;
   color: color-mix(in srgb, var(--muted) 86%, white);
-  font-size: 0.82rem;
+  font-size: 0.92rem;
 }
 
 .footer-icon {
@@ -441,7 +533,7 @@ h3 {
   }
 
   .bottom-nav-button {
-    font-size: 0.9rem;
+    font-size: 1rem;
   }
 
   .item-actions {

@@ -91,6 +91,185 @@ function formatDisplayDate(dateValue) {
   return `${day}.${month}.${year}`;
 }
 
+function formatShortDisplayDate(dateValue) {
+  if (!dateValue || !dateValue.includes("-")) {
+    return "";
+  }
+
+  const [, month, day] = dateValue.split("-");
+  return `${day}.${month}`;
+}
+
+const statsPalette = [
+  "#1e88e5",
+  "#8e24aa",
+  "#e53935",
+  "#fb8c00",
+  "#00acc1",
+  "#3949ab",
+  "#d81b60",
+  "#6d4c41",
+  "#f4511e",
+  "#5e35b1",
+  "#00897b",
+  "#546e7a",
+];
+
+function getSeriesColor(name) {
+  const normalizedName = toCompareKey(name);
+  const hash = [...normalizedName].reduce((accumulator, char, index) => {
+    return accumulator + char.charCodeAt(0) * (index + 1);
+  }, 0);
+
+  return statsPalette[hash % statsPalette.length];
+}
+
+function CumulativeParticipantsChart({ dates, series }) {
+  if (!dates.length || !series.length) {
+    return null;
+  }
+
+  const [highlightedParticipant, setHighlightedParticipant] = useState("");
+
+  const width = 420;
+  const height = 300;
+  const paddingLeft = 30;
+  const paddingRight = 14;
+  const paddingTop = 22;
+  const paddingBottom = 56;
+  const chartWidth = width - paddingLeft - paddingRight;
+  const chartHeight = height - paddingTop - paddingBottom;
+  const maxValue = Math.max(
+    ...series.flatMap((participant) => participant.points.map((point) => point.count)),
+    1
+  );
+
+  const getX = (index) => {
+    if (dates.length === 1) {
+      return paddingLeft + chartWidth / 2;
+    }
+
+    return paddingLeft + (index / (dates.length - 1)) * chartWidth;
+  };
+
+  const getY = (value) => paddingTop + chartHeight - (value / maxValue) * chartHeight;
+
+  const yTicks = [maxValue, maxValue / 2, 0];
+  const formatTickLabel = (value) => {
+    if (Number.isInteger(value)) {
+      return value;
+    }
+
+    return value.toFixed(1);
+  };
+  const firstDateLabel = formatShortDisplayDate(dates[0]);
+  const middleDateLabel = formatShortDisplayDate(dates[Math.floor((dates.length - 1) / 2)]);
+  const lastDateLabel = formatShortDisplayDate(dates[dates.length - 1]);
+
+  return (
+    <div className="stats-chart">
+      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Kumulativ utvikling for deltakere over tid">
+        {yTicks.map((tickValue, index) => {
+          const y = getY(tickValue);
+
+          return (
+            <g key={`${tickValue}-${index}`}>
+              <line x1={paddingLeft} y1={y} x2={paddingLeft + chartWidth} y2={y} className="stats-grid-line" />
+              <text x="2" y={y + 4} textAnchor="start" className="stats-axis-label">
+                {formatTickLabel(tickValue)}
+              </text>
+            </g>
+          );
+        })}
+
+        <line
+          x1={paddingLeft}
+          y1={paddingTop}
+          x2={paddingLeft}
+          y2={paddingTop + chartHeight}
+          className="stats-axis"
+        />
+        <line
+          x1={paddingLeft}
+          y1={paddingTop + chartHeight}
+          x2={paddingLeft + chartWidth}
+          y2={paddingTop + chartHeight}
+          className="stats-axis"
+        />
+
+        {series.map((participant) => {
+          const linePoints = participant.points
+            .map((point, index) => `${getX(index)},${getY(point.count)}`)
+            .join(" ");
+          const isHighlighted = highlightedParticipant === participant.name;
+          const isDimmed = highlightedParticipant && !isHighlighted;
+
+          return (
+            <polyline
+              key={participant.name}
+              points={linePoints}
+              fill="none"
+              className="stats-series-line"
+              style={{
+                stroke: participant.color,
+                opacity: isDimmed ? 0.22 : 1,
+                strokeWidth: isHighlighted ? 6 : 4,
+              }}
+            />
+          );
+        })}
+
+        <text
+          x={paddingLeft}
+          y={paddingTop + chartHeight + 22}
+          textAnchor="start"
+          className="stats-axis-label"
+        >
+          {firstDateLabel}
+        </text>
+        <text
+          x={paddingLeft + chartWidth / 2}
+          y={paddingTop + chartHeight + 26}
+          textAnchor="middle"
+          className="stats-axis-label"
+        >
+          {middleDateLabel}
+        </text>
+        <text
+          x={paddingLeft + chartWidth}
+          y={paddingTop + chartHeight + 22}
+          textAnchor="end"
+          className="stats-axis-label"
+        >
+          {lastDateLabel}
+        </text>
+      </svg>
+
+      <div className="stats-legend" aria-label="Deltakere">
+        {series.map((participant) => {
+          const isSelected = highlightedParticipant === participant.name;
+          const isDimmed = Boolean(highlightedParticipant) && !isSelected;
+
+          return (
+            <button
+              key={participant.name}
+              type="button"
+              className={`stats-legend-item ${isSelected ? "active" : ""} ${isDimmed ? "dimmed" : ""}`}
+              onClick={() =>
+                setHighlightedParticipant((current) => (current === participant.name ? "" : participant.name))
+              }
+              aria-pressed={isSelected}
+            >
+              <span className="stats-legend-dot" style={{ backgroundColor: participant.color }} aria-hidden="true" />
+              <span>{participant.name}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [activeTab, setActiveTab] = useState("registrer");
   const [user, setUser] = useState("");
@@ -314,6 +493,52 @@ function App() {
       .sort((a, b) => b.dateValue.localeCompare(a.dateValue));
   }, [baths, userSearchKey]);
 
+  const cumulativeStats = useMemo(() => {
+    const dates = [...new Set(baths.map((bath) => bath.dateValue))].sort((a, b) => a.localeCompare(b));
+
+    const users = [...new Set(baths.map((bath) => bath.user))].sort((a, b) =>
+      a.localeCompare(b, "nb-NO")
+    );
+
+    const userDateCounts = {};
+
+    baths.forEach((bath) => {
+      if (!userDateCounts[bath.user]) {
+        userDateCounts[bath.user] = {};
+      }
+
+      if (!userDateCounts[bath.user][bath.dateValue]) {
+        userDateCounts[bath.user][bath.dateValue] = 0;
+      }
+
+      userDateCounts[bath.user][bath.dateValue] += Number(bath.points) || 0;
+    });
+
+    const series = users.map((name) => {
+      let runningTotal = 0;
+
+      const points = dates.map((date) => {
+        runningTotal += userDateCounts[name]?.[date] || 0;
+
+        return {
+          date,
+          count: runningTotal,
+        };
+      });
+
+      return {
+        name,
+        color: getSeriesColor(name),
+        points,
+      };
+    });
+
+    return {
+      dates,
+      series,
+    };
+  }, [baths]);
+
   const canSubmit = Boolean(userSearchKey && locationInputKey && bathDate && !isSubmitting);
 
   return (
@@ -455,7 +680,7 @@ function App() {
                 )}
               </div>
             </>
-          ) : (
+          ) : activeTab === "leaderboard" ? (
             <>
               <h2>Poengtavle</h2>
 
@@ -472,6 +697,23 @@ function App() {
                     <strong>{person.points} poeng</strong>
                   </div>
                 ))
+              )}
+            </>
+          ) : (
+            <>
+              <h2>Statistikk</h2>
+
+              {isLoadingData ? (
+                <p className="muted">Laster statistikk...</p>
+              ) : cumulativeStats.series.length === 0 ? (
+                <p className="muted">Ingen registrerte bad enda.</p>
+              ) : (
+                <div className="stats-grid">
+                  <CumulativeParticipantsChart
+                    dates={cumulativeStats.dates}
+                    series={cumulativeStats.series}
+                  />
+                </div>
               )}
             </>
           )}
@@ -497,6 +739,14 @@ function App() {
         >
           <span className="bottom-nav-icon" aria-hidden="true">🏆</span>
           <span className="bottom-nav-label">Poengtavle</span>
+        </button>
+        <button
+          type="button"
+          className={`bottom-nav-button ${activeTab === "statistikk" ? "active" : ""}`}
+          onClick={() => setActiveTab("statistikk")}
+        >
+          <span className="bottom-nav-icon" aria-hidden="true">📈</span>
+          <span className="bottom-nav-label">Statistikk</span>
         </button>
       </nav>
 
