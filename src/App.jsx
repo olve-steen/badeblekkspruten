@@ -300,6 +300,7 @@ function App() {
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isLocationMenuOpen, setIsLocationMenuOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [noticeMessage, setNoticeMessage] = useState("");
   const [pendingDeleteBath, setPendingDeleteBath] = useState(null);
@@ -571,6 +572,45 @@ function App() {
     };
   }, [baths]);
 
+  const locationSuggestions = useMemo(() => {
+    if (!userSearchKey) {
+      return [];
+    }
+
+    const sortedBaths = baths
+      .filter((bath) => toCompareKey(bath.user) === userSearchKey)
+      .sort((a, b) => b.dateValue.localeCompare(a.dateValue));
+    const seenLocations = new Set();
+
+    return sortedBaths
+      .map((bath) => bath.location)
+      .filter((bathLocation) => {
+        const locationKey = toCompareKey(bathLocation);
+
+        if (!locationKey || seenLocations.has(locationKey)) {
+          return false;
+        }
+
+        seenLocations.add(locationKey);
+        return true;
+      });
+  }, [baths, userSearchKey]);
+
+  const visibleLocationSuggestions = useMemo(() => {
+    if (!locationInputKey) {
+      return locationSuggestions;
+    }
+
+    return locationSuggestions.filter((locationOption) =>
+      toCompareKey(locationOption).includes(locationInputKey)
+    );
+  }, [locationInputKey, locationSuggestions]);
+
+  function selectLocationSuggestion(locationOption) {
+    setLocation(locationOption);
+    setIsLocationMenuOpen(false);
+  }
+
   const canSubmit = Boolean(userSearchKey && locationInputKey && bathDate && !isSubmitting);
 
   return (
@@ -599,12 +639,43 @@ function App() {
                 <label className="field-label" htmlFor="location-input">
                   Hvor badet du?
                 </label>
-                <input
-                  id="location-input"
-                  placeholder="Sted"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                />
+                <div className="location-field">
+                  <input
+                    id="location-input"
+                    className="location-input"
+                    placeholder="Sted"
+                    value={location}
+                    autoComplete="off"
+                    onFocus={() => setIsLocationMenuOpen(true)}
+                    onBlur={() => {
+                      window.setTimeout(() => {
+                        setIsLocationMenuOpen(false);
+                      }, 120);
+                    }}
+                    onChange={(e) => {
+                      setLocation(e.target.value);
+                      setIsLocationMenuOpen(true);
+                    }}
+                  />
+
+                  {isLocationMenuOpen && visibleLocationSuggestions.length > 0 && (
+                    <ul className="location-menu" role="listbox" aria-label="Tidligere badesteder">
+                      {visibleLocationSuggestions.map((locationOption) => (
+                        <li key={toCompareKey(locationOption)}>
+                          <button
+                            type="button"
+                            className="location-menu-item"
+                            onClick={() => {
+                              selectLocationSuggestion(locationOption);
+                            }}
+                          >
+                            {locationOption}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
 
                 <label className="field-label" htmlFor="date-input">
                   Dato

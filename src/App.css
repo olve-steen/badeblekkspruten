@@ -153,6 +153,53 @@ input {
   transition: border-color 160ms ease, box-shadow 160ms ease;
 }
 
+.location-field {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.location-input {
+  margin-bottom: 0;
+}
+
+.location-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 10px 24px rgba(0, 24, 40, 0.12);
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.location-menu-item {
+  width: 100%;
+  min-height: 40px;
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 10px;
+  text-align: left;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--ink);
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.location-menu-item:hover {
+  transform: none;
+  background: color-mix(in srgb, var(--shell) 55%, white);
+  box-shadow: none;
+}
+
 input[type="date"] {
   display: block;
   inline-size: 100%;
