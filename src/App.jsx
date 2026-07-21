@@ -484,19 +484,26 @@ function App() {
 
   const leaderboard = useMemo(() => {
     const totals = {};
+    const bathCounts = {};
 
     baths.forEach((bath) => {
       if (!totals[bath.user]) {
         totals[bath.user] = 0;
       }
 
+      if (!bathCounts[bath.user]) {
+        bathCounts[bath.user] = 0;
+      }
+
       totals[bath.user] += bath.points;
+      bathCounts[bath.user] += 1;
     });
 
     const sorted = Object.entries(totals)
       .map(([name, points]) => ({
         name,
         points,
+        bathCount: bathCounts[name] || 0,
       }))
       .sort((a, b) => b.points - a.points);
 
@@ -798,9 +805,10 @@ function App() {
 
                   return (
                     <div key={person.name} className="leaderboard-item">
-                      <span>
+                      <span className="leaderboard-name">
                         {person.rank}. {person.name} {isTopScore ? "👑" : ""}
                       </span>
+                      <span className="leaderboard-bath-count">{person.bathCount} bad</span>
                       <strong>{person.points} poeng</strong>
                     </div>
                   );
